@@ -1,0 +1,44 @@
+_G.Settings = {
+    ["Fast_Attack"] = true,
+    ["Dele_Effect"] = true,
+}
+
+spawn(function()
+    local Rig = require(game.Players.LocalPlayer.PlayerScripts.CombatFramework)
+    local Cam = require(game.ReplicatedStorage.Util.CameraShaker)
+    Cam:Stop()
+    game:GetService('RunService').Stepped:Connect(function()
+        for i, v in pairs(game.Workspace.Enemies:GetChildren()) do
+            if _G.Settings["Fast_Attack"] and (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v.HumanoidRootPart.Position).Magnitude <= 30 and v.Humanoid.Health > 0 then
+                Rig.activeController.attacking = false
+                Rig.activeController.timeToNextAttack = 0
+                Rig.activeController.blocking = false
+                Rig.activeController.timeToNextBlock = 0
+                Rig.activeController.humanoid.AutoRotate = false
+                Rig.activeController.active = false
+                Rig.activeController.hitboxMagnitude = 30
+                Rig.activeController.increment = 3
+                Rig.activeController.currentAttackTrack = nil
+                Rig.activeController.focusStart = 0
+                game:GetService('VirtualUser'):CaptureController()
+                game:GetService('VirtualUser'):Button1Down(Vector2.new(1280, 672))
+                game:GetService('RunService').Stepped:Wait()
+            end
+            if v.Humanoid.Health == 0 then
+                v.Parent = game.ReplicatedStorage
+            end
+        end
+    end)
+end)
+
+spawn(function()
+    game:GetService('RunService').Stepped:Connect(function()
+        if _G.Settings["Dele_Effect"] then
+            for i, v in pairs(game.Workspace["_WorldOrigin"]:GetChildren()) do
+                if v.Name == "CurvedRing" or v.Name == "SlashHit" or v.Name == "SwordSlash" or v.Name == "Sounds" then
+                    v:Destroy() 
+                end
+            end
+        end
+    end)
+end)
